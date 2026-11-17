@@ -431,34 +431,65 @@ class SysPatchStartFrame(wx.Frame):
 
     def _check_if_new_patches_needed(self, patches: dict) -> bool:
         """
-        Checks if any new patches are needed for the user to install
-        Newer users will assume the root patch menu will present missing patches.
-        Thus we'll need to see if the exact same OCLP build was used already
+        Check whether the installed root patch set is missing patches or is out of date.
+
+        Source builds may not have GitHub commit metadata. In that case, use the
+        persisted patcher version, support package version, OS build, and patch
+        names instead of automatically treating every launch as requiring a repatch.
         """
 
-        logging.info("Checking if new patches are needed")
+        logging.info("Checking whether new root patches are needed")
 
-        if self.constants.commit_info[0] in ["Running from source", "Built from source"]:
+        oclp_plist = Path("/System/Library/CoreServices/OpenCore-Legacy-Patcher.plist")
+        if not oclp_plist.exists():
+            logging.info("No installed root patch record found")
             return True
 
-        if self.constants.computer.oclp_sys_url != self.constants.commit_info[2]:
-            # If commits are different, assume patches are as well
+        try:
+            with oclp_plist.open("rb") as plist_file:
+                oclp_plist_data = plistlib.load(plist_file)
+        except (OSError, plistlib.InvalidFileException, ValueError) as error:
+            logging.error(f"Unable to read installed root patch record: {error}")
             return True
 
-        oclp_plist = "/System/Library/CoreServices/OpenCore-Legacy-Patcher.plist"
-        if not Path(oclp_plist).exists():
-            # If it doesn't exist, no patches were ever installed
-            # ie. all patches applicable
+        installed_commit_url = oclp_plist_data.get("Commit URL", "") or ""
+        current_commit_url = self.constants.commit_info[2] or ""
+        if installed_commit_url != current_commit_url:
+            logging.info("Installed root patches were created by a different build")
             return True
 
-        oclp_plist_data = plistlib.load(open(oclp_plist, "rb"))
+        expected_patcher_version = f"v{self.constants.patcher_version}"
+        if oclp_plist_data.get("OpenCore Legacy Patcher") != expected_patcher_version:
+            logging.info("Installed root patches were created by a different patcher version")
+            return True
+
+        expected_support_pkg_version = f"v{self.constants.patcher_support_pkg_version}"
+        if oclp_plist_data.get("PatcherSupportPkg") != expected_support_pkg_version:
+            logging.info("Installed root patches use a different PatcherSupportPkg version")
+            return True
+
+        expected_os_version = (
+            f"{self.constants.detected_os}.{self.constants.detected_os_minor} "
+            f"({self.constants.detected_os_build})"
+        )
+        if oclp_plist_data.get("OS Version") != expected_os_version:
+            logging.info("Installed root patches target a different macOS build")
+            return True
+
         for patch in patches:
-            if (not patch.startswith("Settings") and not patch.startswith("Validation") and patches[patch] is True):
-                # Patches should share the same name as the plist key
-                # See sys_patch/patchsets/base.py for more info
-                if patch.split(": ")[1] not in oclp_plist_data:
-                    logging.info(f"- Patch {patch} not installed")
-                    return True
+            if patch.startswith("Settings") or patch.startswith("Validation"):
+                continue
+            if patches[patch] is not True:
+                continue
 
-        logging.info("No new patches detected for system")
+            # Patchset labels use the format "Category: Patch Name".
+            _, separator, patch_name = patch.partition(": ")
+            if not separator:
+                patch_name = patch
+
+            if patch_name not in oclp_plist_data:
+                logging.info(f"- Patch {patch} is not recorded as installed")
+                return True
+
+        logging.info("All applicable root patches are already installed")
         return False
