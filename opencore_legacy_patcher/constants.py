@@ -15,7 +15,7 @@ class Constants:
         # Patcher Versioning
         self.patcher_version:                 str = "2.6"  # OpenCore-Legacy-Patcher
         self.patcher_support_pkg_version:     str = "2.0.3"  # PatcherSupportPkg
-        self.copyright_date:                  str = "Copyright © 2020-2026 Dortania and OpenCore Legacy Patcher contributors"
+        self.copyright_date:                  str = "Copyright © 2020-2026 Dortania and OpenCore Legacy Patcher contributors; Sequoia Edition maintained by Computer-genius1"
         self.patcher_name:                    str = "OpenCore Legacy Patcher"
 
         # URLs
@@ -24,7 +24,6 @@ class Constants:
         self.guide_link:                      str = "https://dortania.github.io/OpenCore-Legacy-Patcher/"
         self.repo_link:                       str = "https://github.com/dortania/OpenCore-Legacy-Patcher"
         self.installer_pkg_url:               str = f"{self.repo_link}/releases/download/{self.patcher_version}/AutoPkg-Assets.pkg"
-        self.installer_pkg_url_nightly:       str = "http://nightly.link/dortania/OpenCore-Legacy-Patcher/workflows/build-app-wxpython/main/AutoPkg-Assets.pkg.zip"
 
         # OpenCore Versioning
         # https://github.com/acidanthera/OpenCorePkg
