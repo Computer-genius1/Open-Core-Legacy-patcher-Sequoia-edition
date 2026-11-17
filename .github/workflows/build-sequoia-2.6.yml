@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/workflows/build-sequoia-2.6.yml'
       - 'OpenCore-Patcher-GUI.spec'
+      - 'opencore_legacy_patcher/**'
 
 permissions:
   contents: read
