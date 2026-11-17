@@ -56,6 +56,12 @@ To run the project from source, see here: [Build and run from source](./SOURCE.m
 
 ## Credits
 
+### Sequoia Edition
+
+* [Computer-genius1](https://github.com/Computer-genius1) — maintainer of this fork, including project-specific maintenance, release packaging, and Intel-only build configuration.
+
+The contributors listed below are credited for their original upstream work on Dortania's [OpenCore Legacy Patcher](https://github.com/dortania/OpenCore-Legacy-Patcher). This fork builds on that work and does not claim authorship of upstream contributions.
+
 * [Acidanthera](https://github.com/Acidanthera)
   * OpenCorePkg, as well as many of the core kexts and tools
 * [DhinakG](https://github.com/DhinakG)
