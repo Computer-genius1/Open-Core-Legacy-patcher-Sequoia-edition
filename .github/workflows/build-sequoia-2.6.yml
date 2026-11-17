@@ -7,13 +7,14 @@ on:
       - main
     paths:
       - '.github/workflows/build-sequoia-2.6.yml'
+      - 'OpenCore-Patcher-GUI.spec'
 
 permissions:
   contents: read
 
 jobs:
   build:
-    name: Build macOS installer packages
+    name: Build Intel-only macOS installer packages
     runs-on: macos-15-intel
     timeout-minutes: 90
 
